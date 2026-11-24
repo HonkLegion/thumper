@@ -30,6 +30,7 @@ class Thumper implements ThumperInterface
         string $contentType,
         string $body,
         array $headers = [],
+        ?float $timeout = null,
     ): void {
         $this->assertStringKeys($headers, 'Header');
         $payload = \compact('exchange', 'key', 'contentType', 'body');
@@ -37,6 +38,7 @@ class Thumper implements ThumperInterface
             $payload['headers'] = $headers;
         }
 
+        $this->addTimeout($payload, $timeout);
         $this->callAmqp('Publish', $payload);
     }
 
@@ -85,6 +87,7 @@ class Thumper implements ThumperInterface
         bool $internal = false,
         bool $noWait = false,
         array $args = [],
+        ?float $timeout = null,
     ): void {
         $this->assertStringKeys($args, 'Argument');
         $payload = \compact('name', 'durable', 'autoDelete', 'internal', 'noWait');
@@ -93,6 +96,7 @@ class Thumper implements ThumperInterface
             $payload['args'] = $args;
         }
 
+        $this->addTimeout($payload, $timeout);
         $this->callAmqp('DeclareExchange', $payload);
     }
 
@@ -106,6 +110,7 @@ class Thumper implements ThumperInterface
         bool $exclusive = false,
         bool $noWait = false,
         array $args = [],
+        ?float $timeout = null,
     ): void {
         $this->assertStringKeys($args, 'Argument');
         $payload = \compact('name', 'durable', 'autoDelete', 'exclusive', 'noWait');
@@ -113,6 +118,7 @@ class Thumper implements ThumperInterface
             $payload['args'] = $args;
         }
 
+        $this->addTimeout($payload, $timeout);
         $this->callAmqp('DeclareQueue', $payload);
     }
 
@@ -125,6 +131,7 @@ class Thumper implements ThumperInterface
         string $key,
         bool $noWait = false,
         array $args = [],
+        ?float $timeout = null,
     ): void {
         $this->assertStringKeys($args, 'Argument');
         $payload = \compact('queue', 'exchange', 'key', 'noWait');
@@ -132,7 +139,25 @@ class Thumper implements ThumperInterface
             $payload['args'] = $args;
         }
 
+        $this->addTimeout($payload, $timeout);
         $this->callAmqp('BindQueue', $payload);
+    }
+
+    /**
+     * @param array<string, mixed> $payload
+     */
+    private function addTimeout(array &$payload, ?float $timeout): void
+    {
+        if ($timeout === null) {
+            return;
+        }
+
+        $nanoseconds = $timeout * 1_000_000_000;
+        if (!\is_finite($timeout) || $timeout <= 0 || $nanoseconds >= \PHP_INT_MAX) {
+            throw new \InvalidArgumentException('Timeout must be positive, finite, and fit in an integer number of nanoseconds');
+        }
+
+        $payload['timeout'] = \max(1, (int) $nanoseconds);
     }
 
     /**

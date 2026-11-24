@@ -63,7 +63,7 @@ Other plugin errors are thrown as goridge's `ServiceException`, which `ThumperEx
 
 ```php
 try {
-    $thumper->publish('orders', 'order.created', 'application/json', $body);
+    $thumper->publish('orders', 'order.created', 'application/json', $body, timeout: 5.0);
 } catch (TimeoutException | ConnectionException $e) {
     // the broker is unreachable or slow, try again later
 } catch (ThumperException $e) {
