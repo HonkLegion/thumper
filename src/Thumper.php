@@ -5,6 +5,7 @@ declare(strict_types=1);
 namespace Thumper;
 
 use Spiral\Goridge\RPC\RPCInterface;
+use Thumper\Exception\ThumperException;
 
 /**
  * @phpstan-import-type StatusResponse from ThumperInterface
@@ -36,7 +37,7 @@ class Thumper implements ThumperInterface
             $payload['headers'] = $headers;
         }
 
-        $this->rpc->call('Publish', $payload);
+        $this->callAmqp('Publish', $payload);
     }
 
     /**
@@ -92,7 +93,7 @@ class Thumper implements ThumperInterface
             $payload['args'] = $args;
         }
 
-        $this->rpc->call('DeclareExchange', $payload);
+        $this->callAmqp('DeclareExchange', $payload);
     }
 
     /**
@@ -112,7 +113,7 @@ class Thumper implements ThumperInterface
             $payload['args'] = $args;
         }
 
-        $this->rpc->call('DeclareQueue', $payload);
+        $this->callAmqp('DeclareQueue', $payload);
     }
 
     /**
@@ -131,7 +132,30 @@ class Thumper implements ThumperInterface
             $payload['args'] = $args;
         }
 
-        $this->rpc->call('BindQueue', $payload);
+        $this->callAmqp('BindQueue', $payload);
+    }
+
+    /**
+     * Calls a RabbitMQ method of the plugin. The plugin reports a RabbitMQ error in the reply.
+     *
+     * @param non-empty-string $method
+     * @param array<string, mixed> $payload
+     *
+     * @throws ThumperException
+     */
+    private function callAmqp(string $method, array $payload): void
+    {
+        $result = $this->rpc->call($method, $payload);
+
+        if (!\is_array($result) || !\is_string($result['kind'] ?? null) || $result['kind'] === '') {
+            return;
+        }
+
+        throw ThumperException::create(
+            $result['kind'],
+            \is_int($result['code'] ?? null) ? $result['code'] : 0,
+            \is_string($result['reason'] ?? null) ? $result['reason'] : '',
+        );
     }
 
     /**
