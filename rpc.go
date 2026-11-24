@@ -14,8 +14,6 @@ import (
 
 const defaultRPCTimeout = 30 * time.Second
 
-// TODO: improve error handling, ideally the client will be able to distinguish between rr and amqp errors
-
 type rpc struct {
 	plugin *Plugin
 }
@@ -25,6 +23,20 @@ func rpcCtx(timeout time.Duration) (context.Context, context.CancelFunc) {
 		timeout = defaultRPCTimeout
 	}
 	return context.WithTimeout(context.Background(), timeout)
+}
+
+// reply fills out from err, see Result.set. Errors stored in the reply are logged here,
+// because RoadRunner only sees returned ones.
+func (r *rpc) reply(out *Result, method string, err error) error {
+	if err = out.set(err); err != nil || out.Kind == "" {
+		return err
+	}
+	r.plugin.log.Warn("rabbitmq operation failed",
+		slog.String("method", method),
+		slog.String("kind", out.Kind),
+		slog.Int("code", out.Code),
+		slog.String("reason", out.Reason))
+	return nil
 }
 
 type Message struct {
@@ -38,10 +50,10 @@ type Message struct {
 	Timeout time.Duration  `msgpack:"alias:timeout" json:"timeout"`
 }
 
-func (r *rpc) Publish(message *Message, _ *bool) error {
+func (r *rpc) Publish(message *Message, out *Result) error {
 	ctx, cancel := rpcCtx(message.Timeout)
 	defer cancel()
-	return r.plugin.getPublisher().Publish(
+	return r.reply(out, "Publish", r.plugin.getPublisher().Publish(
 		ctx,
 		amqp091.Publishing{
 			Headers:      amqp091.Table(message.Headers),
@@ -53,7 +65,7 @@ func (r *rpc) Publish(message *Message, _ *bool) error {
 			Exchange:   message.Exchange,
 			RoutingKey: message.Key,
 		},
-	)
+	))
 }
 
 type Exchange struct {
@@ -67,10 +79,10 @@ type Exchange struct {
 	Timeout    time.Duration  `msgpack:"alias:timeout" json:"timeout"`
 }
 
-func (r *rpc) DeclareExchange(exchange *Exchange, _ *bool) error {
+func (r *rpc) DeclareExchange(exchange *Exchange, out *Result) error {
 	ctx, cancel := rpcCtx(exchange.Timeout)
 	defer cancel()
-	return r.plugin.getPublisher().DeclareExchange(ctx, amqp.ExchangeOptions{
+	return r.reply(out, "DeclareExchange", r.plugin.getPublisher().DeclareExchange(ctx, amqp.ExchangeOptions{
 		Name:       exchange.Name,
 		Kind:       exchange.Kind,
 		Durable:    exchange.Durable,
@@ -78,7 +90,7 @@ func (r *rpc) DeclareExchange(exchange *Exchange, _ *bool) error {
 		Internal:   exchange.Internal,
 		NoWait:     exchange.NoWait,
 		Args:       amqp091.Table(exchange.Args),
-	})
+	}))
 }
 
 type Queue struct {
@@ -91,7 +103,7 @@ type Queue struct {
 	Timeout    time.Duration  `msgpack:"alias:timeout" json:"timeout"`
 }
 
-func (r *rpc) DeclareQueue(queue *Queue, _ *bool) error {
+func (r *rpc) DeclareQueue(queue *Queue, out *Result) error {
 	ctx, cancel := rpcCtx(queue.Timeout)
 	defer cancel()
 	_, err := r.plugin.getPublisher().DeclareQueue(ctx, amqp.QueueOptions{
@@ -102,7 +114,7 @@ func (r *rpc) DeclareQueue(queue *Queue, _ *bool) error {
 		NoWait:     queue.NoWait,
 		Args:       amqp091.Table(queue.Args),
 	})
-	return err
+	return r.reply(out, "DeclareQueue", err)
 }
 
 type BindQueue struct {
@@ -114,16 +126,16 @@ type BindQueue struct {
 	Timeout  time.Duration  `msgpack:"alias:timeout" json:"timeout"`
 }
 
-func (r *rpc) BindQueue(bind *BindQueue, _ *bool) error {
+func (r *rpc) BindQueue(bind *BindQueue, out *Result) error {
 	ctx, cancel := rpcCtx(bind.Timeout)
 	defer cancel()
-	return r.plugin.getPublisher().DeclareBinding(ctx, amqp.BindingOptions{
+	return r.reply(out, "BindQueue", r.plugin.getPublisher().DeclareBinding(ctx, amqp.BindingOptions{
 		Queue:      bind.Queue,
 		Exchange:   bind.Exchange,
 		RoutingKey: bind.Key,
 		NoWait:     bind.NoWait,
 		Args:       amqp091.Table(bind.Args),
-	})
+	}))
 }
 
 type ConsumerStatus struct {
