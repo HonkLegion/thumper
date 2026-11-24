@@ -50,10 +50,10 @@ redis = { module_name = "github.com/roadrunner-server/redis/v6", tag = "v6.0.0" 
 temporal = { module_name = "github.com/temporalio/roadrunner-temporal/v6", tag = "v6.0.0" }
 
 [plugins.thumper]
-module_name = "github.com/dstrop/thumper"
-tag = "master"
+module_name = "github.com/HonkLegion/thumper"
+tag = "v0.0.0"
 
 # build thumper from the local checkout instead of the published module
 [[replaces]]
-old = "github.com/dstrop/thumper"
+old = "github.com/HonkLegion/thumper"
 new = "/plugin"

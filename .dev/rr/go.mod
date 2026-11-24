@@ -3,7 +3,7 @@ module _
 go 1.27.3
 
 require (
-	github.com/dstrop/thumper v0.3.0
+	github.com/HonkLegion/thumper v0.3.0
 	github.com/roadrunner-server/roadrunner/v3 v3.0.1
 )
 
@@ -228,4 +228,4 @@ exclude (
 	go.temporal.io/api v1.26.1
 )
 
-replace github.com/dstrop/thumper => ../../
+replace github.com/HonkLegion/thumper => ../../

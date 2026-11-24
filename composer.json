@@ -1,5 +1,5 @@
 {
-    "name": "dstrop/thumper",
+    "name": "honklegion/thumper",
     "autoload": {
         "psr-4": {
             "Thumper\\": "src/"

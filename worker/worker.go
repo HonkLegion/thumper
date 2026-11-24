@@ -8,7 +8,7 @@ import (
 	"sync"
 	"time"
 
-	"github.com/dstrop/thumper/common"
+	"github.com/HonkLegion/thumper/common"
 	amqp091 "github.com/rabbitmq/amqp091-go"
 	"github.com/roadrunner-server/pool/v2/payload"
 )

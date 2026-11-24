@@ -9,8 +9,10 @@ Main goals of this plugin are:
 
 ## Project status
 
-This project is in early development stage.  
-It is not recommended to use it in production.
+Consuming runs in production since early 2025 and is stable.  
+Publishing runs in production since late 2026. It is newer, so test it carefully before you rely on it.
+
+The project has no 1.0 release yet, so the API and the config format can still change between versions.
 
 ## Build
 
@@ -32,7 +34,7 @@ Thumper is not available in the builder, so you will need to manually add it to 
 
 ```toml
 [plugins.thumper]
-module_name = "github.com/dstrop/thumper"
+module_name = "github.com/HonkLegion/thumper"
 tag = "v0.0.0"
 ```
 

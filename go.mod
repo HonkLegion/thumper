@@ -1,4 +1,4 @@
-module github.com/dstrop/thumper
+module github.com/HonkLegion/thumper
 
 go 1.27
 

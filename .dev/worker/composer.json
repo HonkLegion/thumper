@@ -6,7 +6,7 @@
         }
     ],
     "require": {
-        "dstrop/thumper": "@dev",
+        "honklegion/thumper": "@dev",
         "tracy/tracy": "^2.10",
         "symfony/console": "^7.0"
     }

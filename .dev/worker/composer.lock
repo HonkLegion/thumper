@@ -7,7 +7,7 @@
     "content-hash": "fd800658e4f0bab7b059ed364f85a15a",
     "packages": [
         {
-            "name": "dstrop/thumper",
+            "name": "honklegion/thumper",
             "version": "dev-master",
             "dist": {
                 "type": "path",
@@ -1138,7 +1138,7 @@
     "aliases": [],
     "minimum-stability": "stable",
     "stability-flags": {
-        "dstrop/thumper": 20
+        "honklegion/thumper": 20
     },
     "prefer-stable": false,
     "prefer-lowest": false,

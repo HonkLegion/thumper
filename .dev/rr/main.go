@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/dstrop/thumper"
+	"github.com/HonkLegion/thumper"
 	"github.com/roadrunner-server/roadrunner/v3/lib"
 )
 

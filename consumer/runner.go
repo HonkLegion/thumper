@@ -7,7 +7,7 @@ import (
 
 	amqp091 "github.com/rabbitmq/amqp091-go"
 
-	"github.com/dstrop/thumper/common"
+	"github.com/HonkLegion/thumper/common"
 )
 
 // Runner consumes a single queue, emitting each delivery as a Job bounded by a

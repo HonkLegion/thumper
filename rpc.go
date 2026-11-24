@@ -7,7 +7,7 @@ import (
 	"log/slog"
 	"time"
 
-	"github.com/dstrop/thumper/amqp"
+	"github.com/HonkLegion/thumper/amqp"
 	amqp091 "github.com/rabbitmq/amqp091-go"
 	"github.com/roadrunner-server/pool/v2/state/process"
 )
