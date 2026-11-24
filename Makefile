@@ -20,6 +20,9 @@ composer: ## install composer dependencies for example worker and plugin
 test: ## run go tests
 	docker compose run --no-deps --rm -w /plugin consumer go test ./...
 
+test-php: ## run php tests
+	docker compose run --no-deps -w /plugin --rm -u "$(shell id -u):$(shell id -g)" consumer composer test
+
 # COVER_PKGS lists only packages with tests
 COVER_PKGS = $$(go list -f '{{if or .TestGoFiles .XTestGoFiles}}{{.ImportPath}}{{end}}' ./...)
 
